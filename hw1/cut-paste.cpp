@@ -48,6 +48,9 @@ void cut_paste(SplayTree *T, int i, int j, int k) {
 		T->join(b);
         
 	}
+    delete a;
+    delete b;
+    delete c;
 }
 
 int main() {
