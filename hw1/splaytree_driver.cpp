@@ -174,7 +174,7 @@ int main() {
 	cout << endl;
 
 	cout << "de-allocating memory for all trees ..." << endl;
-	delete Z;
+    delete Z;
 	delete Y;
 	delete O;
 	delete Q;
@@ -182,6 +182,6 @@ int main() {
 	delete S;
 	delete R;
 	
-	return 0;
+    return 0;
 }
 

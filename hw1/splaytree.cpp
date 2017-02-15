@@ -15,6 +15,7 @@ SplayTree::~SplayTree() {
 }
 
 void SplayTree::destroyNode(Node* n) {
+    if (n == nullptr) return;
 	if(n->get_left() == nullptr && n->get_right() == nullptr)
 	{
 		delete n;
@@ -27,7 +28,7 @@ void SplayTree::destroyNode(Node* n) {
 		destroyNode(n->get_left());
 		delete n;
 	}
-	else {
+	else if (n->get_left() != nullptr && n->get_right() != nullptr){
         destroyNode(n->get_left());
         destroyNode(n->get_right());
 		delete n;
