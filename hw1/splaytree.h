@@ -24,28 +24,38 @@ class SplayTree {
 	unsigned int size();							// Returns the number of elements currently stored in the tree.
 	
 	// Private recursive functions to implement the above.
-//	private:
-	// Fill in your own private methods, and other private data that suits your implementation.
-	// TBD...
-   	Node* insertNode(Node* t, string k,unsigned int r, Node* p);
-   	void printNodes(Node* t);	
-	void prettyPrintNodes(Node * t);
+	private:
+
 	Node* splay(Node* t);
+	
+   	Node* insertNode(Node* t, string k,unsigned int r);
 	Node* find(unsigned int r);
+	void destroyNode(Node* n);
+   	void printNodes(Node* t);	
+	
 	Node* findNode(Node * t,unsigned int r);
+	
+	// Methods to assist splaying
 	void setLeftChild(Node* p, Node* c);
 	void setRightChild(Node* p, Node* c);
 	void rotateRL(Node* a, Node* b, Node* c);
-    void rotateLR(Node* a, Node* b, Node* c);	
-	void set_root(Node* r);
-	void set_num_elements(unsigned int n);
-
+    void rotateLR(Node* a, Node* b, Node* c);
 	Node* splayPGP(Node* z, Node* p, Node* gp, Node* ggp);
 	Node* inLineSplay(Node* z, Node* p, Node* gp, Node* ggp);
 	Node* outOfLineSplay(Node* z, Node* p, Node* gp, Node* ggp);
+	
+	// Setters
+	void set_root(Node* r);
+	void set_num_elements(unsigned int n);
+	
+	// Getters
 	Node* get_root();
 	unsigned int get_num_elements();
-	void destroyNode(Node* n);
+
+	
+	
+	
+	
 };
 
 #endif

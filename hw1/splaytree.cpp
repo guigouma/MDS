@@ -16,30 +16,20 @@ SplayTree::~SplayTree() {
 
 void SplayTree::destroyNode(Node* n) {
     if (n == nullptr) return;
-	if(n->get_left() == nullptr && n->get_right() == nullptr)
-	{
-		delete n;
-	}
-	else if (n->get_left() == nullptr) {
-		destroyNode(n->get_right());
-		delete n;
-	}
-	else if (n->get_right() == nullptr) {
+	if (n->get_left() != nullptr) {
 		destroyNode(n->get_left());
-		delete n;
 	}
-	else if (n->get_left() != nullptr && n->get_right() != nullptr){
-        destroyNode(n->get_left());
-        destroyNode(n->get_right());
-		delete n;
+	if (n->get_right() != nullptr) {
+		destroyNode(n->get_right());
 	}
+	delete n;
 }
 
 void SplayTree::insert(string k, unsigned int r) {
 	assert(r > 0 && r <= num_elements + 1);
 
 	num_elements++;
-	root = insertNode(root, k, r, nullptr);
+	root = insertNode(root, k, r);
 	root = splay(findNode(root, r));
 }
 
@@ -78,7 +68,7 @@ void SplayTree::split(unsigned int r, SplayTree* R) {
 			size = R->get_num_elements();
 			R->get_root()->update_size();
 		}
-		if (root->get_right() != nullptr) num_elements = num_elements - size;//root->get_right()->get_size();
+		if (root->get_right() != nullptr) num_elements = num_elements - size;
 		root->set_right(nullptr);
 		root->update_size();
 	}
@@ -92,15 +82,18 @@ void SplayTree::join(SplayTree* R) {
 		num_elements = R->get_num_elements();
 		R->set_root(nullptr);
 		R->set_num_elements(0);
-		return;
+		
 	}
-	root = splay(findNode(root,num_elements));
-	root->set_right(R->get_root());
-	if ( R->get_root() != nullptr ) R->get_root()->set_parent(root);
-	num_elements = num_elements + R->get_root()->get_size();
-	root->update_size();	
-	R->set_root(nullptr);
-	R->set_num_elements(0);
+	else {
+		root = splay(findNode(root,num_elements));
+		root->set_right(R->get_root());
+		if ( R->get_root() != nullptr ) 
+			R->get_root()->set_parent(root);
+		num_elements = num_elements + R->get_root()->get_size();
+		root->update_size();	
+		R->set_root(nullptr);
+		R->set_num_elements(0);
+	}
 }
 
 void SplayTree::print() {
@@ -128,19 +121,20 @@ Node* SplayTree::findNode(Node * t, unsigned int r) {
 	return t;
 }
 
-Node* SplayTree::insertNode(Node* t, string k, unsigned int r, Node* p) {
+Node* SplayTree::insertNode(Node* t, string k, unsigned int r) {
    	if (t == nullptr) {
 		Node* n = new Node(k); 
-		n->set_parent(p);
 		return n;
 	}
     if (r < t->get_size()) {
-	    t->set_left(insertNode(t->get_left(),k,r,t));
-		t->update_size();
+		Node* n = insertNode(t->get_left(),k,r);
+		n->set_parent(t);
+	    t->set_left(n);
     }
 	else {
-       	t->set_right(insertNode(t->get_right(), k,r,t));
-		t->update_size();
+		Node* n = insertNode(t->get_right(), k,r);
+		n->set_parent(t);
+       	t->set_right(n);
     }
     return t;
 }
@@ -148,50 +142,12 @@ Node* SplayTree::insertNode(Node* t, string k, unsigned int r, Node* p) {
 Node* SplayTree::splay(Node* z) {
 	while (z->get_parent() != nullptr) {
 		Node* p = z->get_parent();
-		// If p and gp
+		// If parent and grandparent are not null
 		if (p->get_parent() != nullptr) {
-			Node* gp = p->get_parent();
-		 	Node* ggp = gp->get_parent();	
-			
-			z = splayPGP(z,p,gp,ggp);	
-			/*	
-			if (gp->get_left() == p && p->get_left() == z) { // If inline
-				Node* c = p->get_right();
-				rotateRL(p,gp,c);
-				Node* b = z->get_right();
-				rotateRL(z,p,b);
-			}
-			else if (gp->get_right() == p && p->get_right() == z) {
-				Node* b = p->get_left();
-				rotateLR(p,gp,b);
-				Node* c = z->get_left();
-				rotateLR(z,p,c);
-			}*/
-/*			if (p->get_left() == z) { // If not inline
-				setRightChild(gp,z);
-				Node* b = z->get_right();
-				rotateRL(z,p,b);
-				Node * c = z->get_left();
-				setRightChild(gp,c);
-				setLeftChild(z,gp);
-			}
-			else {
-				setLeftChild(gp,z);
-				Node* b = z->get_left();
-				rotateLR(z,p,b);
-				Node* c = z->get_right();
-				setLeftChild(gp,c);
-				setRightChild(z,gp);
-			}*/
-/*
-			z->set_parent(ggp);
-			if (ggp != nullptr && ggp->get_left() == gp) ggp->set_left(z);
-            if (ggp != nullptr && ggp->get_right() == gp) ggp->set_right(z);
-			gp->update_size();
-            p->update_size();
-			z->update_size();*/
+			// Pass node, parent, grandparent, and great grandparent
+			z = splayPGP(z,p,p->get_parent(),p->get_parent()->get_parent());	
 		}
-		else { // If no gp
+		else { // If grand parent null, meaning last rotation
 			if (p->get_right() == z) { // If Right
 				z->set_parent(nullptr);
 				Node* b = z->get_left();
@@ -209,15 +165,19 @@ Node* SplayTree::splay(Node* z) {
 	
 	}
 	
-	return z; // maybe could change so root is set here instead of on return
+	return z; 
 }
 
 Node* SplayTree::splayPGP(Node* z, Node* p, Node* gp, Node* ggp) {
+	// Splay to where grand parent was
 	z = inLineSplay(z,p,gp,ggp);
 	z = outOfLineSplay(z,p,gp,ggp);
+	
+	// Set great grandparent
     z->set_parent(ggp);
     if (ggp != nullptr && ggp->get_left() == gp) ggp->set_left(z);
     if (ggp != nullptr && ggp->get_right() == gp) ggp->set_right(z);
+	
     gp->update_size();
     p->update_size();
     z->update_size();
@@ -225,7 +185,7 @@ Node* SplayTree::splayPGP(Node* z, Node* p, Node* gp, Node* ggp) {
 }
 
 Node* SplayTree::inLineSplay(Node* z, Node* p, Node* gp, Node* ggp){
-    if (gp->get_left() == p && p->get_left() == z) { // If inline
+    if (gp->get_left() == p && p->get_left() == z) { 
         Node* c = p->get_right();
         rotateRL(p,gp,c);
         Node* b = z->get_right();
@@ -241,7 +201,7 @@ Node* SplayTree::inLineSplay(Node* z, Node* p, Node* gp, Node* ggp){
 }
 
 Node* SplayTree::outOfLineSplay(Node* z, Node* p, Node* gp, Node* ggp) {
-	if (p->get_left() == z) { // If not inline
+	if (p->get_left() == z) { 
         setRightChild(gp,z);
         Node* b = z->get_right();
         rotateRL(z,p,b);
@@ -282,21 +242,15 @@ void SplayTree::setRightChild(Node* parent, Node* child) {
 
 void SplayTree::printNodes(Node* r) {
 	if (r == nullptr) return;
+	
 	printNodes(r->get_left());
-	//cout << "------" << r->get_key() << "|" << endl;
-	if (r->get_key().compare("\n")) cout << r->get_key() << " ";
+	
+	if (r->get_key().compare("\n")) {
+		cout << r->get_key() << " ";
+	}
 	else cout << r->get_key();
+	
 	printNodes(r->get_right());
-}
-
-void SplayTree::prettyPrintNodes(Node* r) {
-	if (r == nullptr) return; 
-	prettyPrintNodes(r->get_left());
-	if (r->get_parent() == nullptr) 
- 	 	cout << "(K:" <<  r->get_key() << " S:" << r->get_size() << " P=" << r->get_parent() << ")";
-	else
-		cout << "(K:" <<  r->get_key() << " S:" << r->get_size() << " P=" << r->get_parent()->get_key() << ")";
-    	prettyPrintNodes(r->get_right());
 }
 
 void SplayTree::set_root(Node* r) {

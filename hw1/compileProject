@@ -1,3 +1,0 @@
-g++ -g -Wall -c splaytree.cpp node.cpp -std=c++11
-g++ -g -Wall splaytree_driver.cpp splaytree.o node.o -std=c++11 -o splaytree_driver
-./splaytree_driver

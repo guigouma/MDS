@@ -1,5 +1,0 @@
-./cut-paste < "LOTR-The Fellowship of the Ring.in" > output.txt
-
-echo "diff"
-diff output.txt "LOTR-The Fellowship of the Ring.out"
-
